@@ -1,0 +1,34 @@
+{
+  "name": "reservr-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reservr/reservr-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/reservr/reservr-api/issues"
+  },
+  "homepage": "https://github.com/reservr/reservr-api#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "nedb": "^1.8.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.18.2",
+    "eslint-config-fortech-react": "^1.0.2",
+    "eslint-plugin-compat": "^2.2.0",
+    "eslint-plugin-fp": "^2.3.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0"
+  }
+}
