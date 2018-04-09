@@ -1,5 +1,7 @@
 const express = require( "express" );
 const bodyParser = require( "body-parser" );
+const FacebookTokenStrategy = require( "passport-facebook-token" );
+const passport = require( "passport" );
 
 const app = express();
 
@@ -57,11 +59,35 @@ db.mcapikeys = new Datastore( {
     autoload: true
 } );
 
+passport.use( new FacebookTokenStrategy( {
+    clientID: 1691171894466083,
+    clientSecret: "f5dc1360d37ed59e4c150eb061098055"
+}, function( accessToken, refreshToken, profile, done ) {
+    db.users.find( { facebookId: profile.id }, function ( error, user ) {
+        if ( !user ) {
+            db.users.insert( {
+                profile
+            }, function( err, newUser ) {
+                return done( error, newUser );
+            } );
+        }
+    } );
+} ) );
+
 app.get( "/orgs", ( req, res ) => {
     db.orgs.find( {}, ( err, orgs ) => {
         res.send( { orgs } );
     } );
 } );
+
+app.post(
+    "/auth/facebook/token",
+    passport.authenticate( "facebook-token" ),
+    function ( req, res ) {
+    // do something with req.user
+        res.send( req.user ? 200 : 401 );
+    }
+);
 
 app.get( "/events/:slug", ( req, res ) => {
     const { slug } = req.params;
