@@ -1,12 +1,33 @@
 const express = require( "express" );
 const bodyParser = require( "body-parser" );
 const eventsController = require( "./eventsController" );
+const multer = require( "multer" );
+
 const Datastore = require( "nedb" );
+
+const storage = multer.diskStorage( {
+    destination( req, file, cb ) {
+        cb( null, "public/uploads" );
+    },
+    filename( req, file, cb ) {
+        const splitName = file.originalname.split( "." );
+        const ext = splitName[ splitName.length - 1 ];
+        const filename = splitName
+            .reverse()
+            .slice( 1 )
+            .reverse()
+            .join( "." );
+
+        cb( null, `${ filename }-${ Date.now() }.${ ext }` );
+    }
+} );
+
+const upload = multer( { storage } );
 
 /*
 TODO:
-- upload images
-- process images by size
+- upload multiple images
+- resize
 */
 
 const app = express();
@@ -23,6 +44,8 @@ db.events = new Datastore( {
     filename: `${ config.dataDir + config.dbDir }/events.db`,
     autoload: true
 } );
+
+app.use( express.static( "public" ) );
 
 // config express
 app.use( bodyParser.json( {
@@ -48,6 +71,10 @@ app.get( "/events/:id", events.getOne );
 app.delete( "/events/:id", events.deleteItem );
 app.post( "/events", events.post );
 app.put( "/events/:id", events.put );
+
+app.post( "/upload", upload.array( "photos", 12 ), function( req, res ) {
+    res.send( { message: "got it" } );
+} );
 
 app.listen( config.port, config.ipAddress, function() {
     console.log(
