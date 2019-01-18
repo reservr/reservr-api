@@ -2,6 +2,8 @@ const express = require( "express" );
 const bodyParser = require( "body-parser" );
 const eventsController = require( "./eventsController" );
 const multer = require( "multer" );
+const fs = require( "fs" );
+const sharp = require( "sharp" );
 
 const Datastore = require( "nedb" );
 
@@ -26,8 +28,8 @@ const upload = multer( { storage } );
 
 /*
 TODO:
-- upload multiple images
 - resize
+- dropzone testing
 */
 
 const app = express();
@@ -73,7 +75,25 @@ app.post( "/events", events.post );
 app.put( "/events/:id", events.put );
 
 app.post( "/upload", upload.array( "photos", 12 ), function( req, res ) {
-    res.send( { message: "got it" } );
+    res.send( {
+        message: "success",
+        images: req.files.map( f => ( {
+            path: f.path
+        } ) )
+    } );
+} );
+
+app.delete( "/upload/:name", function( req, res ) {
+    fs.unlink( `public/uploads/${ req.params.name }`, err => {
+        if ( err ) {
+            res.status( 400 ).send( { message: err } );
+            return;
+        }
+        res.send( {
+            message: "deleted",
+            name: req.params.name
+        } );
+    } );
 } );
 
 app.listen( config.port, config.ipAddress, function() {
