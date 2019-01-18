@@ -3,7 +3,6 @@ const bodyParser = require( "body-parser" );
 const eventsController = require( "./eventsController" );
 const multer = require( "multer" );
 const fs = require( "fs" );
-const sharp = require( "sharp" );
 
 const Datastore = require( "nedb" );
 
