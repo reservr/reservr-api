@@ -1,6 +1,5 @@
 const express = require( "express" );
 const bodyParser = require( "body-parser" );
-const eventsController = require( "./eventsController" );
 const multer = require( "multer" );
 const fs = require( "fs" );
 const session = require( "express-session" );
@@ -8,8 +7,11 @@ const NedbStorage = require( "tch-nedb-session" )( session );
 const Datastore = require( "nedb" );
 const passport = require( "passport" );
 const LocalStrategy = require( "passport-local" ).Strategy;
-
 const bCrypt = require( "bcrypt-nodejs" );
+
+const eventsController = require( "./eventsController" );
+const orgsController = require( "./orgsController" );
+const reservationsController = require( "./reservationsController" );
 
 // Generates hash using bCrypt
 const createHash = function( password ) {
@@ -17,7 +19,7 @@ const createHash = function( password ) {
 };
 
 const validateEmail = function( email ) {
-    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test( email );
 };
 
@@ -70,13 +72,24 @@ const config = {
     port: 8080
 };
 
+// initialise databases
 db.events = new Datastore( {
     filename: `${ config.dataDir + config.dbDir }/events.db`,
     autoload: true
 } );
 
+db.orgs = new Datastore( {
+    filename: `${ config.dataDir + config.dbDir }/orgs.db`,
+    autoload: true
+} );
+
 db.users = new Datastore( {
     filename: `${ config.dataDir + config.dbDir }/users.db`,
+    autoload: true
+} );
+
+db.reservations = new Datastore( {
+    filename: `${ config.dataDir + config.dbDir }/reservations.db`,
     autoload: true
 } );
 
@@ -137,13 +150,33 @@ app.all( "*", function( req, res, next ) {
     next();
 } );
 
+// controllers
 const events = eventsController( config, db );
+const orgs = orgsController( config, db );
+const reservations = reservationsController( config, db );
 
+// events controller routes
 app.get( "/events", events.get );
 app.get( "/events/:id", events.getOne );
 app.delete( "/events/:id", events.deleteItem );
 app.post( "/events", events.post );
 app.put( "/events/:id", events.put );
+
+// orgs controller routes
+app.get( "/orgs", orgs.get );
+app.get( "/orgs/:id", orgs.getOneById );
+app.delete( "/orgs/:id", orgs.deleteItem );
+app.post( "/orgs", orgs.post );
+app.put( "/orgs/:id", orgs.put );
+// orgs controller routes exeptions
+app.get( "/org/:slug", orgs.getOneBySlug );
+
+// events controller routes
+app.get( "/reservations", reservations.get );
+app.get( "/reservations/:id", reservations.getOne );
+app.delete( "/reservations/:id", reservations.deleteItem );
+app.post( "/reservations", reservations.post );
+app.put( "/reservations/:id", reservations.put );
 
 app.post( "/upload", upload.array( "photos", 12 ), function( req, res ) {
     res.send( {

@@ -4,6 +4,9 @@ const eventSchema = Joi.object().keys( {
     name: Joi.string()
         .min( 3 )
         .required(),
+    orgId: Joi.string()
+        .min( 3 )
+        .required(),
     description: Joi.string()
         .min( 3 )
         .required(),
@@ -77,6 +80,7 @@ module.exports = function( config, db ) {
         } );
     };
 
+    // TODO: this needs to be implemented
     const deleteItem = function( req, res ) {
         db.events.findOne( { _id: req.params.id }, function( err, doc ) {
             if ( err ) {

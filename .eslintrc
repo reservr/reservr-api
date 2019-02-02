@@ -1,17 +1,15 @@
 {
     "extends": "fortech-react",
-    "plugins": [
-        "fp",
-        "compat"
-    ],
+    "plugins": ["fp", "compat"],
     "env": {
         "browser": false,
         "mocha": true
     },
     "rules": {
         // code complexity: http://www.tutorialspoint.com/software_testing_dictionary/cyclomatic_complexity.htm
-        "complexity": [ 1, 40 ],
-        "comma-dangle": [ 2, "never" ],
+        "no-underscore-dangle": ["error", { "allow": ["_id"] }],
+        "complexity": [1, 40],
+        "comma-dangle": [2, "never"],
         "no-param-reassign": 1,
         "no-mixed-operators": 1,
         "no-plusplus": 1,
@@ -19,7 +17,18 @@
         "no-script-url": 1,
         "object-curly-newline": 0,
         "prefer-destructuring": 1,
-        "class-methods-use-this": [ 2, { "exceptMethods": ["componentDidMount", "componentWillUpdate", "componentDidUpdate", "componentWillUnmount", "render"] } ],
+        "class-methods-use-this": [
+            2,
+            {
+                "exceptMethods": [
+                    "componentDidMount",
+                    "componentWillUpdate",
+                    "componentDidUpdate",
+                    "componentWillUnmount",
+                    "render"
+                ]
+            }
+        ],
         "prefer-promise-reject-errors": 1,
         "func-names": 0,
 
@@ -43,9 +52,12 @@
         "import/first": 1,
 
         //immutable
-        "fp/no-mutating-assign": [ 0 ],
-        "fp/no-mutating-methods": [ 0 ],
-        "fp/no-mutation": [ 0, { "exceptions": [ { "property": "propTypes" }, { "property": "prefetch" } ] } ],
+        "fp/no-mutating-assign": [0],
+        "fp/no-mutating-methods": [0],
+        "fp/no-mutation": [
+            0,
+            { "exceptions": [{ "property": "propTypes" }, { "property": "prefetch" }] }
+        ],
 
         //compatibility
         "compat/compat": 2
