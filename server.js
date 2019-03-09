@@ -200,11 +200,6 @@ app.delete( "/upload/:name", function( req, res ) {
     } );
 } );
 
-/*
-curl -X POST -d '{"username":"sebi.kovacs+26@gmail.com", "password":"12345678"}' -H "Content-Type: application/json" http://localhost:8080/login
-curl -X POST -d '{"username":"sebi.kovacs+26@gmail.com", "password":"12345678"}' -H "Content-Type: application/json" http://localhost:8080/signup
-*/
-
 app.post( "/login", function( req, res, next ) {
     passport.authenticate( "local", function( err, user ) {
         if ( err ) {
