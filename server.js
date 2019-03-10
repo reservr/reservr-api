@@ -136,7 +136,7 @@ passport.serializeUser( function( user, done ) {
 
 passport.deserializeUser( function( id, done ) {
     db.users.findOne( { _id: id }, function( err, user ) {
-        done( err, user );
+        done( err, user._id );
     } );
 } );
 
@@ -145,8 +145,9 @@ app.use( passport.session() );
 
 // CORS headers
 app.all( "*", function( req, res, next ) {
-    res.header( "Access-Control-Allow-Origin", "*" );
+    res.header( "Access-Control-Allow-Origin", "http://localhost:8082" );
     res.header( "Access-Control-Allow-Headers", "X-Requested-With, Content-Type" );
+    res.header( "Access-Control-Allow-Credentials", "true" );
     next();
 } );
 
@@ -172,7 +173,7 @@ app.put( "/orgs/:id", orgs.put );
 app.get( "/org/:slug", orgs.getOneBySlug );
 
 // events controller routes
-app.get( "/reservations", reservations.get );
+app.get( "/reservations", isAuthenticated, reservations.get );
 app.get( "/reservations/:id", reservations.getOne );
 app.delete( "/reservations/:id", reservations.deleteItem );
 app.post( "/reservations", reservations.post );
@@ -205,8 +206,9 @@ app.post( "/login", function( req, res, next ) {
         if ( err ) {
             return next( err );
         }
+
         if ( !user ) {
-            return res.send( { message: "user not found" } );
+            return res.status( 401 ).send( { message: "user not found" } );
         }
 
         return req.logIn( user, function( loginError ) {
@@ -255,19 +257,26 @@ app.post( "/signup", function( req, res ) {
                     { username: newDoc.username, password: newDoc.password, _id: newDoc._id },
                     function( loginError ) {
                         if ( loginError ) {
-                            console.log( "logginError" );
-                            console.log( loginError );
                             res.status( 400 ).send( { message: loginError } );
                             return;
                         }
 
-                        res.send( { message: "logged in?" } );
+                        res.send( { message: "signed up and logged in." } );
                     }
                 );
             }
         );
     } );
 } );
+
+// is authenticated
+function isAuthenticated( req, res, next ) {
+    if ( req.user ) {
+        return next();
+    }
+
+    return res.status( 401 ).send( { message: "Not logged in." } );
+}
 
 app.listen( config.port, config.ipAddress, function() {
     console.log(
