@@ -201,6 +201,18 @@ app.delete( "/upload/:name", function( req, res ) {
     } );
 } );
 
+app.get( "/logout", function( req, res, next ) {
+    req.session.destroy( ( err ) => {
+        if ( err ) {
+            return next( err );
+        }
+
+        req.logout();
+
+        return res.status( 200 ).clearCookie( "connect.sid", { path: "/" } ).send( { message: "logged out" } );
+    } );
+} );
+
 app.post( "/login", function( req, res, next ) {
     passport.authenticate( "local", function( err, user ) {
         if ( err ) {
@@ -228,6 +240,11 @@ app.post( "/signup", function( req, res ) {
 
     if ( !validateEmail( req.body.username ) ) {
         res.status( 400 ).send( { message: "Email is invalid." } );
+        return;
+    }
+
+    if ( req.body.userType === "admin" && !req.body.orgName ) {
+        res.status( 400 ).send( { message: "Organisation name is invalid or unspecified." } );
         return;
     }
 
