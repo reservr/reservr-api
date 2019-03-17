@@ -55,12 +55,12 @@ module.exports = function( config, db ) {
         } );
     };
 
-    // curl -d '{"name":"value1", "location":"Rockefeler Plaza", "confirmationEmail": "sebi.kovacs@gmail.com", "locale":"en"}' -H "Content-Type: application/json" -X POST http://localhost:8080/orgs
     const post = function( req, res ) {
-        // TODO: create slug before inserting
         Joi.validate( req.body, orgSchema )
             .then( function( data ) {
-                db.orgs.insert( data, function( err, newDoc ) {
+                const name = convertNameToSlug( data.name );
+                const newData = Object.assign( {}, data, { name } );
+                db.orgs.insert( newData, function( err, newDoc ) {
                     if ( err ) {
                         res.status( 400 ).send( { message: err } );
                     }
@@ -87,6 +87,10 @@ module.exports = function( config, db ) {
                 res.status( 400 ).send( { message: err.message } );
             } );
     };
+
+    function convertNameToSlug ( name ) {
+        return name.toLowerCase().split( " " ).join( "-" );
+    }
 
     return {
         get,
