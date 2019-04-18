@@ -159,6 +159,7 @@ const reservations = reservationsController( config, db );
 const users = usersController( config, db );
 
 // users controller
+app.get( "/", orgs.get );
 app.get( "/users", isAuthenticated, users.getOne );
 
 // events controller routes
