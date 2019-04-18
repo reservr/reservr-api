@@ -144,13 +144,13 @@ passport.deserializeUser( function( id, done ) {
 app.use( passport.initialize() );
 app.use( passport.session() );
 
-// CORS headers
-app.all( "*", function( req, res, next ) {
-    res.header( "Access-Control-Allow-Origin", "http://localhost:8082" );
-    res.header( "Access-Control-Allow-Headers", "X-Requested-With, Content-Type" );
-    res.header( "Access-Control-Allow-Credentials", "true" );
-    next();
-} );
+// // CORS headers
+// app.all( "*", function( req, res, next ) {
+//     res.header( "Access-Control-Allow-Origin", "http://localhost:8082" );
+//     res.header( "Access-Control-Allow-Headers", "X-Requested-With, Content-Type" );
+//     res.header( "Access-Control-Allow-Credentials", "true" );
+//     next();
+// } );
 
 // controllers
 const events = eventsController( config, db );
