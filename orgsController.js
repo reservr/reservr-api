@@ -18,9 +18,27 @@ const orgSchema = Joi.object().keys( {
 
 module.exports = function( config, db ) {
     const get = function( req, res ) {
-        db.orgs.find( {}, function( err, docs ) {
+        const query = req.query.slug ? { slug: req.params.slug } : {};
+
+        if ( req.user ) {
+            db.users.findOne( { _id: req.user }, ( err, user ) => {
+                if ( user.userType === "admin" ) {
+                    db.orgs.findOne( { _id: user.orgId }, ( error, org ) => {
+                        if ( error ) {
+                            res.status( 400 ).send( { message: err } );
+                            return;
+                        }
+                        res.send( { message: "success org", org } );
+                    } );
+                }
+            } );
+            return;
+        }
+
+        db.orgs.find( query, function( err, docs ) {
             if ( err ) {
                 res.status( 400 ).send( { message: err } );
+                return;
             }
 
             res.send( { message: "success", orgs: docs.length } );
@@ -31,15 +49,7 @@ module.exports = function( config, db ) {
         db.orgs.findOne( { _id: req.params.id }, function( err, doc ) {
             if ( err ) {
                 res.status( 400 ).send( { message: err } );
-            }
-            res.send( { message: "success", org: doc } );
-        } );
-    };
-
-    const getOneBySlug = function( req, res ) {
-        db.orgs.findOne( { slug: req.params.slug }, function( err, doc ) {
-            if ( err ) {
-                res.status( 400 ).send( { message: err } );
+                return;
             }
             res.send( { message: "success", org: doc } );
         } );
@@ -50,6 +60,7 @@ module.exports = function( config, db ) {
         db.orgs.findOne( { _id: req.params.id }, function( err, doc ) {
             if ( err ) {
                 res.status( 400 ).send( { message: err } );
+                return;
             }
             res.send( { message: "success delete", org: doc } );
         } );
@@ -63,6 +74,7 @@ module.exports = function( config, db ) {
                 db.orgs.insert( newData, function( err, newDoc ) {
                     if ( err ) {
                         res.status( 400 ).send( { message: err } );
+                        return;
                     }
                     res.send( { message: "success", org: newDoc } );
                 } );
@@ -72,13 +84,13 @@ module.exports = function( config, db ) {
             } );
     };
 
-    // curl -d '{"name":"value2", "location":"Rockefeler Plaza", "confirmationEmail": "sebi.kovacs@gmail.com", "locale":"en"}' -H "Content-Type: application/json" -X PUT http://localhost:8080/orgs/Rza3p3VKwsMnHjmh
     const put = function( req, res ) {
         Joi.validate( req.body, orgSchema )
             .then( function( data ) {
                 db.orgs.update( { _id: req.params.id }, data, {}, function( err, numReplaced ) {
                     if ( err ) {
                         res.status( 400 ).send( { message: err } );
+                        return;
                     }
                     res.send( { message: "success", numReplaced } );
                 } );
@@ -95,7 +107,6 @@ module.exports = function( config, db ) {
     return {
         get,
         getOneById,
-        getOneBySlug,
         deleteItem,
         post,
         put

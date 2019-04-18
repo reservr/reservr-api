@@ -12,6 +12,7 @@ const bCrypt = require( "bcrypt-nodejs" );
 const eventsController = require( "./eventsController" );
 const orgsController = require( "./orgsController" );
 const reservationsController = require( "./reservationsController" );
+const usersController = require( "./usersController" );
 
 // Generates hash using bCrypt
 const createHash = function( password ) {
@@ -69,7 +70,7 @@ const config = {
     dataDir: "data",
     dbDir: "/db",
     ipAddress: "127.0.0.1",
-    port: 8080
+    port: 9001
 };
 
 // initialise databases
@@ -155,6 +156,10 @@ app.all( "*", function( req, res, next ) {
 const events = eventsController( config, db );
 const orgs = orgsController( config, db );
 const reservations = reservationsController( config, db );
+const users = usersController( config, db );
+
+// users controller
+app.get( "/users", isAuthenticated, users.getOne );
 
 // events controller routes
 app.get( "/events", events.get );
@@ -169,8 +174,6 @@ app.get( "/orgs/:id", orgs.getOneById );
 app.delete( "/orgs/:id", orgs.deleteItem );
 app.post( "/orgs", orgs.post );
 app.put( "/orgs/:id", orgs.put );
-// orgs controller routes exeptions
-app.get( "/org/:slug", orgs.getOneBySlug );
 
 // events controller routes
 app.get( "/reservations", isAuthenticated, reservations.get );
@@ -255,34 +258,81 @@ app.post( "/signup", function( req, res ) {
         }
 
         if ( user ) {
-            res.status( 400 ).send( { message: "there is already a user with this email" } );
+            res.status( 400 ).send( { message: "There is already a user with this email." } );
             return;
         }
 
-        db.users.insert(
-            {
-                username: req.body.username,
-                password: createHash( req.body.password )
-            },
-            function( error, newDoc ) {
-                if ( error ) {
-                    res.status( 400 ).send( { message: error } );
-                    return;
+        // if it's admin, create an org
+        if ( req.body.userType === "admin" ) {
+            const org = {
+                name: req.body.orgName,
+                location: "",
+                logo: "",
+                confirmationEmail: req.body.username,
+                locale: "RO"
+            };
+
+            db.orgs.insert( org, function( orgsError, newDoc ) {
+                if ( orgsError ) {
+                    res.status( 400 ).send( { message: orgsError } );
                 }
 
-                req.login(
-                    { username: newDoc.username, password: newDoc.password, _id: newDoc._id },
-                    function( loginError ) {
-                        if ( loginError ) {
-                            res.status( 400 ).send( { message: loginError } );
+                db.users.insert(
+                    {
+                        username: req.body.username,
+                        password: createHash( req.body.password ),
+                        orgId: newDoc._id,
+                        userType: req.body.userType
+                    },
+                    function( usersError, newUser ) {
+                        if ( usersError ) {
+                            res.status( 400 ).send( { message: usersError } );
                             return;
                         }
 
-                        res.send( { message: "signed up and logged in." } );
+                        req.login(
+                            { username: newUser.username, password: newUser.password, _id: newUser._id },
+                            function( loginError ) {
+                                if ( loginError ) {
+                                    res.status( 400 ).send( { message: loginError } );
+                                    return;
+                                }
+
+                                res.send( { message: "signed up and logged in." } );
+                            }
+                        );
                     }
                 );
-            }
-        );
+            } );
+        }
+
+        if ( req.body.userType === "regular" ) {
+            db.users.insert(
+                {
+                    username: req.body.username,
+                    password: createHash( req.body.password )
+                },
+                function( error, newDoc ) {
+                    if ( error ) {
+                        res.status( 400 ).send( { message: error } );
+                        return;
+                    }
+
+                    req.login(
+                        { username: newDoc.username, password: newDoc.password, _id: newDoc._id },
+                        function( loginError ) {
+                            if ( loginError ) {
+                                res.status( 400 ).send( { message: loginError } );
+                                return;
+                            }
+
+                            res.send( { message: "signed up and logged in." } );
+                        }
+                    );
+                }
+            );
+        }
+        // if it's a regular user, just and it to the db
     } );
 } );
 
