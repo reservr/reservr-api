@@ -35,7 +35,6 @@ const eventSchema = Joi.object().keys( {
 
 module.exports = function( config, db ) {
     const get = function( req, res ) {
-        console.log( req.login );
         let { skip, limit } = req.query;
         const { start, end } = req.query;
         const { sortBy, direction } = req.query;

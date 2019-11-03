@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "nodemon server.js"
   },
   "repository": {
@@ -17,6 +17,12 @@
     "url": "https://github.com/reservr/reservr-api/issues"
   },
   "homepage": "https://github.com/reservr/reservr-api#readme",
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.2",
@@ -29,7 +35,7 @@
     "passport": "^0.4.0",
     "passport-facebook-token": "^3.3.0",
     "passport-local": "^1.0.0",
-    "sharp": "^0.21.2",
+    "sharp": "^0.23.1",
     "tch-nedb-session": "^1.0.3"
   },
   "devDependencies": {
@@ -40,6 +46,7 @@
     "eslint-plugin-fp": "^2.3.0",
     "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-react": "^7.7.0"
+    "eslint-plugin-react": "^7.7.0",
+    "jest": "^24.9.0"
   }
 }
